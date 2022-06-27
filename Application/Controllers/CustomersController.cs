@@ -1,52 +1,77 @@
-using Application.Models;
+using Domain.Customers;
+using Domain.Services;
+using Domain.Services.Customers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Controllers;
 
-[ApiController]
 [Route("api/v1/customers")]
+[ApiController]
 public class CustomersController : ControllerBase
+
 {
     private readonly ILogger<CustomersController> _logger;
+    private readonly IHandler _handler;
+    private readonly CommandQueryFactory _commandQueryFactory;
 
-    private static readonly Dictionary<string, Customer> _data = new Dictionary<string, Customer>();
 
-    public CustomersController(ILogger<CustomersController> logger)
+    public CustomersController(ILogger<CustomersController> logger, IHandler handler, CommandQueryFactory commandQueryFactory)
     {
         _logger = logger;
+        _handler = handler;
+        _commandQueryFactory = commandQueryFactory;
     }
 
     [HttpGet]
-    public IEnumerable<Customer> GetAll()
+    [Route("")]
+    public async Task<List<Customer>> GetAll()
     {
-        return _data.Values;
+        return await _handler.RunQueryAsync(_commandQueryFactory.CreateGetCustomersQuery(0));
     }
     
     [HttpGet]
     [Route("{customerId}")]
-    public ActionResult Get(string customerId)
+    public async Task<ActionResult> Get(string customerId)
     {
-        if (!_data.ContainsKey(customerId)) return new NotFoundResult();
-        return new OkObjectResult(_data[customerId]);
+        var customer = await _handler.RunQueryAsync(_commandQueryFactory.CreateGetCustomerQuery(customerId));
+        if (customer == null) return new NotFoundObjectResult(null);
+        return new OkObjectResult(customer);
     }
 
     [HttpPost]
-    public void Add(Customer customer)
+    [Route("")]
+    public async Task Add(Models.Customer customer)
     {
-        _data[customer.Id] = customer;
+        await _handler.RunCommandAsync(_commandQueryFactory.CreateAddCustomerCommand(new Customer
+        {
+            Id = customer.Id,
+            Name = customer.Name,
+            Address = customer.Address,
+            City = customer.City,
+            Country = customer.Country,
+        }));
     }
 
     [HttpPut]
-    public void Update(Customer customer)
+    [Route("{customerId}")]
+    public async Task Update(string customerId, Models.Customer customer)
     {
-        _data[customer.Id] = customer;
+        if (!customerId.Equals(customer.Id)) throw new BadHttpRequestException("url does not match id in customer");
+        await _handler.RunCommandAsync(_commandQueryFactory.CreateUpdateCustomerCommand(new Customer
+        {
+            Id = customer.Id,
+            Name = customer.Name,
+            Address = customer.Address,
+            City = customer.City,
+            Country = customer.Country,
+        }));
     }
     
     [HttpDelete]
     [Route("{customerId}")]
-    public void Delete(string customerId)
+    public async Task Delete(string customerId)
     {
-        _data.Remove(customerId);
+        await _handler.RunCommandAsync(_commandQueryFactory.CreateDeleteCustomerCommand(customerId));
     }
 
 }

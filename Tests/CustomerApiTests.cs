@@ -13,6 +13,7 @@ public class CustomerApiTests : IClassFixture<ApiWebApplicationFactory>
     private readonly ApiWebApplicationFactory _fixture;
 
     public CustomerApiTests(ApiWebApplicationFactory fixture)
+    
     {
         _fixture = fixture;
     }
@@ -90,7 +91,7 @@ public class CustomerApiTests : IClassFixture<ApiWebApplicationFactory>
             City = "Paris",
             Country = "Framce"
         };
-        await client.PutAsJsonAsync($"/api/v1/customers", customerUpdated);
+        await client.PutAsJsonAsync($"/api/v1/customers/{customer.Id}", customerUpdated);
 
         //then
         var response = await client.GetAsync($"/api/v1/customers/{customer.Id}");
@@ -112,6 +113,7 @@ public class CustomerApiTests : IClassFixture<ApiWebApplicationFactory>
             Country = "Spain"
         };
         using var client = _fixture.CreateClient();
+        
 
         //when
         await client.PostAsJsonAsync($"/api/v1/customers", customer);
