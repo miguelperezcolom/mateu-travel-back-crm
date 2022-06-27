@@ -1,18 +1,14 @@
 using Domain.Customers;
 using Domain.Services;
 using Domain.Services.Customers;
+using Infrastructure;
 using Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
-builder.Services.AddSingleton<CommandQueryFactory>();
-builder.Services.AddSingleton<IHandler, Handler>();
-builder.Services.AddSingleton<ICustomerRepository, CustomerRepository>();
-
-
+builder.Services.UseDependencies();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
