@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Persistence;
 
-public class CustomerRepository : ICustomerRepository
+public class DictionaryCustomerRepository : ICustomerRepository
 {
     
     private static readonly Dictionary<string, Customer> _data = new Dictionary<string, Customer>();

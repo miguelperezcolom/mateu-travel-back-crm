@@ -1,7 +1,9 @@
-﻿using Domain.Customers;
+﻿using System.Configuration;
+using Domain.Customers;
 using Domain.Services;
 using Domain.Services.Customers;
 using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
@@ -14,7 +16,9 @@ public static class DependencyInjectorExtension
         
         services.AddSingleton<CommandQueryFactory>();
         services.AddSingleton<IHandler, Handler>();
-        services.AddSingleton<ICustomerRepository, CustomerRepository>();
+        //services.AddSingleton<ICustomerRepository, DictionaryCustomerRepository>();
+        services.AddSingleton<IApplicationDbContext, ApplicationDbContext>();
+        services.AddSingleton<ICustomerRepository, EFCustomerRepository>();
         
         return services;
     }
